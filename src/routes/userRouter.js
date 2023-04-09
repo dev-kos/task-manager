@@ -7,7 +7,7 @@ const auth = require("../middleware/auth");
 
 const router = new express.Router();
 
-router.post("/users", async (req, res) => {
+router.post("/api/users", async (req, res) => {
   const user = new UserModel(req.body);
 
   try {
@@ -20,11 +20,11 @@ router.post("/users", async (req, res) => {
   }
 });
 
-router.get("/users/me", auth, (req, res) => {
+router.get("/api/users/me", auth, (req, res) => {
   res.send(req.user);
 });
 
-router.patch("/users/me", auth, async (req, res) => {
+router.patch("/api/users/me", auth, async (req, res) => {
   const user = req.user;
   const updates = Object.keys(req.body);
   const validUpdates = ["name", "age", "email", "password"];
@@ -46,7 +46,7 @@ router.patch("/users/me", auth, async (req, res) => {
   }
 });
 
-router.post("/users/logout", auth, async (req, res) => {
+router.post("/api/users/logout", auth, async (req, res) => {
   try {
     req.user.token = null;
     await req.user.save();
@@ -57,7 +57,7 @@ router.post("/users/logout", auth, async (req, res) => {
   }
 });
 
-router.post("/users/login", async (req, res) => {
+router.post("/api/users/login", async (req, res) => {
   const { email, password } = req.body;
 
   try {
