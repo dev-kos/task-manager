@@ -5,58 +5,74 @@ const bcrypt = require("bcryptjs");
 
 const Schema = mongoose.Schema;
 
-const UserSchema = new Schema({
-  name: {
-    type: String,
-    required: true,
-  },
-  age: {
-    type: Number,
-    validate: (value) => {
-      if (value < 18) {
-        throw new Error("Age must be greater or equal 18");
-      }
+const UserSchema = new Schema(
+  {
+    name: {
+      type: String,
+      required: true,
     },
-  },
-  email: {
-    type: String,
-    unique: true,
-    required: true,
-    validate: (value) => {
-      if (!validator.isEmail(value)) {
-        throw new Error("Email is incorrect");
-      }
-    },
-  },
-  password: {
-    type: String,
-    trim: true,
-    required: true,
-    validate: (value) => {
-      if (value.length < 6) {
-        throw new Error("Password should have at least 6 characters");
-      }
-
-      if (value === "password") {
-        throw new Error("Laugh");
-      }
-    },
-  },
-  tokens: [
-    {
-      token: {
-        type: String,
-        required: true,
+    age: {
+      type: Number,
+      validate: (value) => {
+        if (value < 18) {
+          throw new Error("Age must be greater or equal 18");
+        }
       },
     },
-  ],
+    email: {
+      type: String,
+      unique: true,
+      required: true,
+      validate: (value) => {
+        if (!validator.isEmail(value)) {
+          throw new Error("Email is incorrect");
+        }
+      },
+    },
+    password: {
+      type: String,
+      trim: true,
+      required: true,
+      validate: (value) => {
+        if (value.length < 6) {
+          throw new Error("Password should have at least 6 characters");
+        }
+
+        if (value === "password") {
+          throw new Error("Laugh");
+        }
+      },
+    },
+    token: {
+      type: String,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+UserSchema.virtual("tasks", {
+  ref: "Task",
+  localField: "_id",
+  foreignField: "owner",
 });
+
+UserSchema.methods.toJSON = function () {
+  const user = this;
+  const userObject = user.toObject();
+
+  delete userObject.password;
+  delete userObject.token;
+
+  return userObject;
+};
 
 UserSchema.methods.generateWebToken = async function () {
   const user = this;
-  const token = jwt.sign({ _id: user._id.toString() }, "secretkeymy");
+  const token = jwt.sign({ _id: user._id.toString() }, process.env.SECRET_KEY);
 
-  user.tokens = user.tokens.concat({ token });
+  user.token = token;
 
   await user.save();
 
