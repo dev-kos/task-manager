@@ -11,14 +11,6 @@ const UserSchema = new Schema(
       type: String,
       required: true,
     },
-    age: {
-      type: Number,
-      validate: (value) => {
-        if (value < 18) {
-          throw new Error("Age must be greater or equal 18");
-        }
-      },
-    },
     email: {
       type: String,
       unique: true,
